@@ -1,0 +1,11 @@
+regops:
+  application_name: "Test Application"
+  owner: "John Doe"
+  authors: "John Doe, Jane Doe"
+  version_template: "v{}.{}"
+  xlsx_template: "templates/hazard_log_template.xlsx"
+  output_folder: "artifacts"
+  output_name_template: "v{}.{}_hazard_log.xlsx"
+  hazard_id_template: "H{}"
+  cause_id_template: "H{}.C{}"
+  control_id_template: "H{}.C{}.C{}"

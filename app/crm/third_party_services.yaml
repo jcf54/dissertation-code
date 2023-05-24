@@ -1,0 +1,4 @@
+services:
+  - name: "Server hosting"
+    url: "https://azure.microsoft.com/en-au/services/virtual-machines/"
+    description: "Used to host the application, they adhere to ISO 27001, ..."

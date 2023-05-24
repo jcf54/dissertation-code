@@ -1,0 +1,107 @@
+stages:
+- Code quality
+- Security
+- Application assurance
+- Compliance
+
+black:
+  stage: Code quality
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - cd app
+    - python3 -m black . --check --diff
+
+ruff:
+  stage: Code quality
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - cd app
+    - python3 -m ruff check . --format junit > ruff.json
+  artifacts:
+    when: always
+    reports:
+      junit: app/ruff.json
+
+bandit:
+  stage: Security
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - cd app
+    - python3 -m bandit . -c ./bandit.yaml -r --format xml > bandit.xml
+  artifacts:
+    when: always
+    reports:
+      junit: app/bandit.xml
+
+trufflehog:
+  stage: Security
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - cd app
+    - trufflehog3 . -c ./trufflehog.yaml
+
+mypy:
+  stage: Application assurance
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - cd app
+    - mypy . --junit-xml=report.xml
+  artifacts:
+    when: always
+    reports:
+      junit: app/report.xml
+
+pytest:
+  stage: Application assurance
+  image: python:3.11
+  script:
+    - pip install -r requirements.txt
+    - cd app
+    - coverage run -m pytest -rsv --junit-xml=report.xml
+    - coverage report
+    - coverage xml
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: app/coverage.xml
+      junit: app/report.xml
+
+generate-documentation:
+  stage: Compliance
+  image: python:3.11
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  before_script:
+    - mkdir ~/.ssh/
+    - echo "${REGOPS_KNOWN_HOSTS}" > ~/.ssh/known_hosts
+    - echo "$REGOPS_DEPLOY_KEY" | base64 -d > ~/.ssh/id_rsa.deploy
+    - chmod 600 ~/.ssh/id_rsa.deploy
+  script:
+    - pip install -r requirements.txt
+    - cd regops
+    - mkdir -p artifacts
+    - python generate_hazard_log.py
+    - python generate_risk_management_plan.py
+    - python generate_risk_management_system.py
+    - python generate_safety_case_report.py
+    - mkdir /gen_docs
+    - cd /gen_docs
+    - GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.deploy -o IdentitiesOnly=yes' git clone git@GITLABSERVER.local:group/regops-demo-documentation.git .
+    - cp /builds/group/regops-demo/regops/artifacts/*_hazard_log.xlsx /gen_docs/
+    - cp /builds/group/regops-demo/regops/artifacts/*.md /gen_docs/
+    - GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.deploy -o IdentitiesOnly=yes' git config user.email "regopsci+email@email.local"
+    - GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.deploy -o IdentitiesOnly=yes' git config user.name "regopsci"
+    - GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.deploy -o IdentitiesOnly=yes' git add .
+    - GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.deploy -o IdentitiesOnly=yes' git commit -m "Update documentation (automated)"
+    - GIT_SSH_COMMAND='ssh -i ~/.ssh/id_rsa.deploy -o IdentitiesOnly=yes' git push origin main
+  artifacts:
+    paths:
+      - regops/artifacts

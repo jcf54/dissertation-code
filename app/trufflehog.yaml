@@ -1,0 +1,5 @@
+exclude:
+  - message: "Caches"
+    paths:
+      - .ruff_cache/**
+      - .pytest_cache/**

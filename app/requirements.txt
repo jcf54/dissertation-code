@@ -1,0 +1,9 @@
+fastapi
+# URL: https://pypi.org/project/fastapi/
+# FastAPI is the web framework used in this application.
+# It has a comprehensive testing suite with 100% coverage,
+# and is used by many large organisations, like Microsoft and Netflix. 
+uvicorn
+# URL: https://pypi.org/project/uvicorn/
+# Uvicorn is the server used to run the FastAPI application.
+# It has a comprehensive testing suite, and is highly used.

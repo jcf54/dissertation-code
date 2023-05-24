@@ -1,0 +1,18 @@
+hazards:
+  - name: Initial hazard one
+    clinical_impact: Initial hazard one
+    causes:
+      - cause: Initial hazard one
+        controls:
+          - control: Initial hazard one
+            initial_consequence: Considerable
+            initial_likelihood: Medium
+            initial_sofware_design: Initial hazard one
+            initial_training_communication: Initial hazard one
+            initial_business_process: Initial hazard one
+            residual_consequence: Minor
+            residual_likelihood: Low
+            residual_sofware_design: Initial hazard one
+            residual_training_communication: Initial hazard one
+            residual_business_process: Initial hazard one
+            tag: DCB0129
